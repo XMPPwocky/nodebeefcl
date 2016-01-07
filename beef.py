@@ -4,12 +4,13 @@ import numpy as np
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("kernel", help="The kernel to use; 18030.cl or 18273.cl")
+parser.add_argument("rng_type", choices=["18030", "18273"])
 parser.add_argument("outputs", nargs="+", type=float)
 parser.add_argument("--cl-platform", default=0)
 parser.add_argument("--cl-device", default=0)
 parser.add_argument("--max-results", default=16)
 parser.add_argument("--max-skip", default=32)
+parser.add_argument("--dump-length", default=64)
 args = parser.parse_args()
 
 platform = cl.get_platforms()[args.cl_platform]
@@ -17,7 +18,11 @@ device = platform.get_devices()[args.cl_device]
 ctx = cl.Context([device])
 queue = cl.CommandQueue(ctx)
 
-kernel_src = open(args.kernel).read()
+if args.rng_type == "18030":
+    kernel_src = open("18030.cl").read()
+elif args.rng_type == "18273":
+    kernel_src = open("18273.cl").read()
+
 program = cl.Program(ctx, kernel_src).build()
 
 max_results = args.max_results 
@@ -47,10 +52,21 @@ cl.enqueue_copy(queue, result_count_np, result_count_cl)
 cl.enqueue_copy(queue, result_np, result_cl)
 
 print "Found", result_count_np, "results."
-print "States:"
 for q in result_np[0:result_count_np]:
-    j = lower_state_np[0] | ((q & 0xFFFF)<<16)
-    k = lower_state_np[1] | (q & 0xFFFF0000)
+    j = np.uint32(lower_state_np[0] | ((q & 0xFFFF)<<16))
+    k = np.uint32(lower_state_np[1] | (q & 0xFFFF0000))
 
-    print "\t("+j + ", "+ k + ")"
-print "Run with --make-predictions (state_first, state_last) to predict future outputs."
+    print "\tState: (" + str(j) + ", "+ str(k) + ")"
+    for i in range(args.dump_length):
+        if args.rng_type == "18273":
+            j = (18273 * (j & 0xFFFF)) + (j >> 16)
+            k = (36969 * (k & 0xFFFF)) + (k >> 16)
+            x = np.uint32((j << 16) + (k & 0xFFFF))
+            pred = x * np.float64("2.3283064365386962890625e-10")
+        if args.rng_type == "18030":
+            j = (18030 * (j & 0xFFFF)) + (j >> 16)
+            k = (36969 * (k & 0xFFFF)) + (k >> 16)
+            x = np.uint32((j << 16) + (k & 0xFFFF))
+            pred = x * np.float64("2.3283064365386962890625e-10")
+        print "\t\t" + str(pred)
+

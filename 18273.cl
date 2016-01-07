@@ -4,9 +4,6 @@ double run_rng(uint2 *state) {
 	(*state).x = r0; (*state).y = r1;
 	uint x_uint = (r0 << 16) + (r1 & 0xFFFF);
 	double x = (double)x_uint;
-	if (x < 0.0) { 
-		x = x + 4294967296.0;
-	}
 	return x * 2.3283064365386962890625e-10;
 
 }
@@ -30,7 +27,7 @@ state.y = state_base.y | (guess & 0xFFFF0000);
 
 
 uint cur_output = 0;
-for (uint i = 0; i < search_len && cur_output < outputs_len; i++) {
+for (uint i = 1; i <= search_len && cur_output < outputs_len; i++) {
 	  double s = run_rng(&state);
 	  if (s == outputs[cur_output]) {
 	  cur_output += 1;

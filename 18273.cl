@@ -1,10 +1,11 @@
-double run_rng(uint2 *state) {
+uint run_rng(uint2 *state) {
 	uint r0 = (18273 * ((*state).x & 0xFFFF)) + ((*state).x >> 16);
 	uint r1 = (36969 * ((*state).y & 0xFFFF)) + ((*state).y >> 16);
 	(*state).x = r0; (*state).y = r1;
 	uint x_uint = (r0 << 16) + (r1 & 0xFFFF);
-	double x = (double)x_uint;
-	return x * 2.3283064365386962890625e-10;
+	return x_uint;
+//	double x = (double)x_uint;
+//	return x * 2.3283064365386962890625e-10;
 
 }
 
@@ -13,7 +14,7 @@ __kernel void node_newer_rng(
 			     const uint search_len,
 			     const uint successful_guesses_max,
 
-			     __global const double *outputs,
+			     __global const uint *outputs,
 			     const uint outputs_len,
 			     __global uint *successful_guesses_count,
 			     __global uint *successful_guesses

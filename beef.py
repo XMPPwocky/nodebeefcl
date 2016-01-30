@@ -42,7 +42,7 @@ def normalize(n):
 def toint(n):
     return int(n / np.float64(2.3283064365386962890625e-10))
 
-full_outputs = map(normalize, map(toint, args.outputs))
+full_outputs = map(toint, map(normalize, args.outputs))
 state_sample = full_outputs[0] 
 
 lower_state_np = np.array([state_sample>>16, state_sample&0xFFFF], dtype=np.uint32)

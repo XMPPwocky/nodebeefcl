@@ -1,3 +1,5 @@
+#pragma OPENCL EXTENSION cl_khr_fp64 : enable
+
 uint run_rng(uint2 *state) {
 	uint r0 = (18273 * ((*state).x & 0xFFFF)) + ((*state).x >> 16);
 	uint r1 = (36969 * ((*state).y & 0xFFFF)) + ((*state).y >> 16);

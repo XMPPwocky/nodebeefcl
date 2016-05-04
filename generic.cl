@@ -18,7 +18,7 @@ __kernel void node_newer_rng(
     uint state = outputs[0] | (guess<<16);
 
     uint cur_output = 1;
-    for (uint i = 0; i <= search_len && cur_output < outputs_len; i++) {
+    for (uint i = 0; i < search_len && cur_output < outputs_len; i++) {
         *&state = run_rng(state, a);
         if ((state&0xFFFF) == outputs[cur_output]) {
             cur_output += 1;
